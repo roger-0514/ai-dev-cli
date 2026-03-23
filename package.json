@@ -1,0 +1,21 @@
+{
+  "name": "ai-dev-cli",
+  "version": "1.0.0",
+  "description": "A CLI for AI development",
+  "main": "index.js",
+  "bin": {
+    "ai-dev-cli": "./src/index.js"
+  },
+  "scripts": {
+    "dev": "node ./src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.15.1",
+  "type": "module",
+  "dependencies": {
+    "commander": "^14.0.3"
+  }
+}

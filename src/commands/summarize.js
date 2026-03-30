@@ -5,16 +5,24 @@ import {
   makeJsonOption,
 } from "../options/model.js";
 import { resolveConfig } from "../config/resolve-config.js";
+import { createError } from "../errors/cli-error.js";
+import { ERROR_CODES } from "../errors/error-codes.js";
+import { logger } from "../utils/logger.js";
 
 export const makeSummarizeCommand = () => {
   const summarize = makeCommand("summarize");
   summarize
+    .argument("[text]", "text to summarize")
     .addOption(makeModelOption())
     .addOption(makeTemperatureOption())
     .addOption(makeJsonOption())
-    .action(async (opts, cmd) => {
+    .action(async (text, opts, cmd) => {
+      if (!text || !String(text).trim()) {
+        throw createError(ERROR_CODES.PARAMETER, "Missing required argument: text");
+      }
+
       const config = await resolveConfig(cmd, opts);
-      console.log("execute summarize command", config);
+      logger.info("execute summarize command", { text, config });
     });
   return summarize;
 };

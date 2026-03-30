@@ -2,6 +2,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { DEFAULTS } from "./defaults.js";
+import { createError } from "../errors/cli-error.js";
+import { ERROR_CODES } from "../errors/error-codes.js";
 
 const CONFIG_DIR = ".ai-dev-cli";
 const CONFIG_NAME = "config.json";
@@ -57,7 +59,11 @@ export async function loadConfigFile() {
     if (err.code === "ENOENT") {
       return {};
     }
-    throw err;
+    throw createError(
+      ERROR_CODES.CONFIG,
+      `Failed to load config file: ${configPath}`,
+      err,
+    );
   }
 }
 

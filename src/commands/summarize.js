@@ -8,6 +8,7 @@ import { resolveConfig } from "../config/resolve-config.js";
 import { createError } from "../errors/cli-error.js";
 import { ERROR_CODES } from "../errors/error-codes.js";
 import { logger } from "../utils/logger.js";
+import { normalizeJson } from "../utils/format.js";
 
 export const makeSummarizeCommand = () => {
   const summarize = makeCommand("summarize");
@@ -22,9 +23,24 @@ export const makeSummarizeCommand = () => {
       }
 
       const config = await resolveConfig(cmd, opts);
+      const { model, temperature, json } = config;
+      const answer = mockSummarize(text, model, temperature, json);
+      if (json) {
+        console.log(answer);
+        return;
+      }
+      logger.info("summarize answer", answer);
       logger.info("execute summarize command", { text, config });
     });
   return summarize;
 };
+
+function mockSummarize(text, model, temperature, json) {
+  let answer = "hi this is a mock summarize answer";
+  if (json) {
+    answer = normalizeJson("text", text, model, temperature, json, answer);
+  }
+  return answer;
+}
 
 export default makeSummarizeCommand;

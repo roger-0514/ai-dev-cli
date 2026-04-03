@@ -2,6 +2,7 @@ import { Command } from "commander";
 import { expect, test, vi } from "vitest";
 
 import { makeSummarizeCommand } from "../../src/commands/summarize.js";
+import { DEFAULTS } from "../../src/config/defaults.js";
 import { ERROR_CODES } from "../../src/errors/error-codes.js";
 
 test("summarize: 解析 text 与 --json", async () => {
@@ -21,6 +22,7 @@ test("summarize: 解析 text 与 --json", async () => {
     const payload = JSON.parse(log.mock.calls[0][0]);
     expect(payload.text).toBe("text");
     expect(payload.json).toBe(true);
+    expect(payload.provider).toBe(DEFAULTS.provider);
   } finally {
     log.mockRestore();
   }

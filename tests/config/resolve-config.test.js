@@ -44,14 +44,17 @@ test("readEnvOverrides: 只读取已设置的环境变量", () => {
     model: process.env.AI_DEV_CLI_MODEL,
     temperature: process.env.AI_DEV_CLI_TEMPERATURE,
     json: process.env.AI_DEV_CLI_JSON,
+    provider: process.env.AI_DEV_CLI_PROVIDER,
   };
   try {
     process.env.AI_DEV_CLI_MODEL = "m-env";
     process.env.AI_DEV_CLI_TEMPERATURE = "0.7";
+    process.env.AI_DEV_CLI_PROVIDER = "anthropic";
     delete process.env.AI_DEV_CLI_JSON;
     const o = readEnvOverrides();
     expect(o.model).toBe("m-env");
     expect(o.temperature).toBe(0.7);
+    expect(o.provider).toBe("anthropic");
     expect("json" in o).toBe(false);
   } finally {
     if (prev.model === undefined) {
@@ -69,6 +72,11 @@ test("readEnvOverrides: 只读取已设置的环境变量", () => {
     } else {
       process.env.AI_DEV_CLI_JSON = prev.json;
     }
+    if (prev.provider === undefined) {
+      delete process.env.AI_DEV_CLI_PROVIDER;
+    } else {
+      process.env.AI_DEV_CLI_PROVIDER = prev.provider;
+    }
   }
 });
 
@@ -84,4 +92,18 @@ test("resolveConfig: CLI --model 覆盖默认值（无配置文件）", async ()
   const config = await resolveConfig(askCmd, askCmd.opts());
   expect(config.model).toBe("cli-model");
   expect(config.temperature).toBe(DEFAULTS.temperature);
+});
+
+test("resolveConfig: CLI -p 覆盖 provider（无配置文件）", async () => {
+  const program = new Command();
+  program.exitOverride();
+  program.addCommand(makeAskCommand());
+  await program.parseAsync(
+    ["ask", "-p", "anthropic", "hello"],
+    { from: "user" },
+  );
+  const askCmd = program.commands.find((c) => c.name() === "ask");
+  const config = await resolveConfig(askCmd, askCmd.opts());
+  expect(config.provider).toBe("anthropic");
+  expect(config.model).toBe(DEFAULTS.model);
 });

@@ -9,6 +9,7 @@ import { createError } from "../errors/cli-error.js";
 import { ERROR_CODES } from "../errors/error-codes.js";
 import { logger } from "../utils/logger.js";
 import { normalizeJson } from "../utils/format.js";
+import { makeProviderOption } from "../options/provider.js";
 
 export const makeAskCommand = () => {
   const ask = makeCommand("ask");
@@ -17,6 +18,7 @@ export const makeAskCommand = () => {
     .addOption(makeModelOption())
     .addOption(makeTemperatureOption())
     .addOption(makeJsonOption())
+    .addOption(makeProviderOption())
     .action(async (question, opts, cmd) => {
       if (!question || !String(question).trim()) {
         throw createError(
@@ -29,9 +31,9 @@ export const makeAskCommand = () => {
       //  1.use model
       //  2.use temperature
       //  3.use json
-      const { model, temperature, json } = config;
+      const { model, temperature, json, provider } = config;
       //  4.return answer
-      const answer = mockAnswer(question, model, temperature, json);
+      const answer = mockAnswer(question, model, temperature, json, provider);
       if (json) {
         console.log(answer);
         return;
@@ -44,10 +46,18 @@ export const makeAskCommand = () => {
   return ask;
 };
 
-function mockAnswer(question, model, temperature, json) {
+function mockAnswer(question, model, temperature, json, provider) {
   let answer = "hi this is a mock answer";
   if (json) {
-    answer = normalizeJson("question", question, model, temperature, json, answer);
+    answer = normalizeJson(
+      "question",
+      question,
+      model,
+      temperature,
+      json,
+      answer,
+      provider,
+    );
   }
   return answer;
 }

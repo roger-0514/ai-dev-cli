@@ -13,6 +13,7 @@ const ENV = {
   model: "AI_DEV_CLI_MODEL",
   temperature: "AI_DEV_CLI_TEMPERATURE",
   json: "AI_DEV_CLI_JSON",
+  provider: "AI_DEV_CLI_PROVIDER",
 };
 
 export function getConfigPath() {
@@ -42,6 +43,10 @@ export function readEnvOverrides() {
   const j = process.env[ENV.json];
   if (j !== undefined && j !== "") {
     out.json = parseEnvBool(j);
+  }
+  const p = process.env[ENV.provider];
+  if (p !== undefined && p !== "") {
+    out.provider = p;
   }
   return out;
 }
@@ -81,10 +86,13 @@ function pickConfigFields(data) {
   if (typeof data.json === "boolean") {
     out.json = data.json;
   }
+  if (typeof data.provider === "string") {
+    out.provider = data.provider;
+  }
   return out;
 }
 
-const OPTION_KEYS = ["model", "temperature", "json"];
+const OPTION_KEYS = ["model", "temperature", "json", "provider"];
 
 /**
  * 默认值 → 配置文件 → 环境变量（不含 CLI）。

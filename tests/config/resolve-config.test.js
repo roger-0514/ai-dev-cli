@@ -8,6 +8,12 @@ import {
 } from "../../src/config/resolve-config.js";
 import { makeAskCommand } from "../../src/commands/ask.js";
 
+vi.mock("../../src/providers/index.js", () => ({
+  createProvider: () => ({
+    ask: vi.fn().mockResolvedValue("mock provider answer"),
+  }),
+}));
+
 const { readFileMock } = vi.hoisted(() => ({
   readFileMock: vi.fn(),
 }));

@@ -7,9 +7,9 @@ import {
 import { resolveConfig } from "../config/resolve-config.js";
 import { createError } from "../errors/cli-error.js";
 import { ERROR_CODES } from "../errors/error-codes.js";
-import { logger } from "../utils/logger.js";
-import { normalizeJson } from "../utils/format.js";
 import { makeProviderOption } from "../options/provider.js";
+import { createProvider } from "../providers/index.js";
+import { normalizeJson } from "../utils/format.js";
 
 export const makeAskCommand = () => {
   const ask = makeCommand("ask");
@@ -28,38 +28,24 @@ export const makeAskCommand = () => {
       }
 
       const config = await resolveConfig(cmd, opts);
-      //  1.use model
-      //  2.use temperature
-      //  3.use json
-      const { model, temperature, json, provider } = config;
-      //  4.return answer
-      const answer = mockAnswer(question, model, temperature, json, provider);
-      if (json) {
-        console.log(answer);
+      const answer = await createProvider(config).ask(question);
+      if (config.json) {
+        console.log(
+          normalizeJson(
+            "question",
+            question,
+            config.model,
+            config.temperature,
+            config.json,
+            answer,
+            config.provider,
+          ),
+        );
         return;
       }
-
-      logger.info("answer", answer);
-
-      logger.info("execute ask command", { question, config });
+      console.log(answer);
     });
   return ask;
 };
-
-function mockAnswer(question, model, temperature, json, provider) {
-  let answer = "hi this is a mock answer";
-  if (json) {
-    answer = normalizeJson(
-      "question",
-      question,
-      model,
-      temperature,
-      json,
-      answer,
-      provider,
-    );
-  }
-  return answer;
-}
 
 export default makeAskCommand;

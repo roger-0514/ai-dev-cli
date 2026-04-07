@@ -7,9 +7,9 @@ import {
 import { resolveConfig } from "../config/resolve-config.js";
 import { createError } from "../errors/cli-error.js";
 import { ERROR_CODES } from "../errors/error-codes.js";
-import { logger } from "../utils/logger.js";
-import { normalizeJson } from "../utils/format.js";
 import { makeProviderOption } from "../options/provider.js";
+import { createProvider } from "../providers/index.js";
+import { normalizeJson } from "../utils/format.js";
 
 export const makeSummarizeCommand = () => {
   const summarize = makeCommand("summarize");
@@ -25,32 +25,26 @@ export const makeSummarizeCommand = () => {
       }
 
       const config = await resolveConfig(cmd, opts);
-      const { model, temperature, json, provider } = config;
-      const answer = mockSummarize(text, model, temperature, json, provider);
-      if (json) {
-        console.log(answer);
+      const answer = await createProvider(config).summarize(text);
+      if (config.json) {
+        console.log(
+          normalizeJson(
+            "text",
+            text,
+            config.model,
+            config.temperature,
+            config.json,
+            answer,
+            config.provider,
+          ),
+        );
         return;
       }
-      logger.info("summarize answer", answer);
-      logger.info("execute summarize command", { text, config });
+      console.log(answer);
     });
   return summarize;
 };
 
-function mockSummarize(text, model, temperature, json, provider) {
-  let answer = "hi this is a mock summarize answer";
-  if (json) {
-    answer = normalizeJson(
-      "text",
-      text,
-      model,
-      temperature,
-      json,
-      answer,
-      provider,
-    );
-  }
-  return answer;
-}
+
 
 export default makeSummarizeCommand;

@@ -1,6 +1,11 @@
 import { Command } from "commander";
 import { expect, test, vi } from "vitest";
 
+const summarizeMock = vi.fn();
+vi.mock("../../src/providers/index.js", () => ({
+  createProvider: () => ({ summarize: summarizeMock }),
+}));
+
 import { makeSummarizeCommand } from "../../src/commands/summarize.js";
 import { DEFAULTS } from "../../src/config/defaults.js";
 import { ERROR_CODES } from "../../src/errors/error-codes.js";
@@ -13,6 +18,7 @@ test("summarize: 解析 text 与 --json", async () => {
   const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
   try {
+    summarizeMock.mockResolvedValue("provider summarize answer");
     await program.parseAsync(["summarize", "--json", "text"], { from: "user" });
 
     const cmd = program.commands.find((c) => c.name() === "summarize");

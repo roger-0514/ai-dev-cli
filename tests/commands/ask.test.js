@@ -1,6 +1,11 @@
 import { Command } from "commander";
 import { expect, test, vi } from "vitest";
 
+const askMock = vi.fn();
+vi.mock("../../src/providers/index.js", () => ({
+  createProvider: () => ({ ask: askMock }),
+}));
+
 import { makeAskCommand } from "../../src/commands/ask.js";
 import { DEFAULTS } from "../../src/config/defaults.js";
 import { ERROR_CODES } from "../../src/errors/error-codes.js";
@@ -13,6 +18,7 @@ test("ask: 解析 question 与 --json", async () => {
   const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
   try {
+    askMock.mockResolvedValue("provider answer");
     await program.parseAsync(["ask", "--json", "hello"], { from: "user" });
 
     const cmd = program.commands.find((c) => c.name() === "ask");
@@ -36,6 +42,7 @@ test("ask: --json 与 -p 写入 payload.provider", async () => {
   const log = vi.spyOn(console, "log").mockImplementation(() => {});
 
   try {
+    askMock.mockResolvedValue("provider answer");
     await program.parseAsync(
       ["ask", "--json", "-p", "anthropic", "hello"],
       { from: "user" },
